@@ -1,15 +1,10 @@
-from typing import Optional
-from pydantic import BaseModel
+from sqlalchemy import Column, Integer, String
+from app.database import Base
 
-# Modell zum Erstellen
-class JobApplication(BaseModel):
-    id: int
-    company: str
-    role: str
-    status: str = "applied"
+class JobApplicationModel(Base):
+    __tablename__ = "applications"
 
-# Modell für Updates
-class JobApplicationUpdate(BaseModel):
-    company: Optional[str] = None
-    role: Optional[str] = None
-    status: Optional[str] = None
+    id = Column(Integer, primary_key=True, index=True)
+    company = Column(String, nullable=False)
+    role = Column(String, nullable=False)
+    status = Column(String, default="applied")

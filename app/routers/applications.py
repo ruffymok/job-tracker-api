@@ -1,6 +1,9 @@
-from fastapi import APIRouter, HTTPException, status
-from app.models import JobApplication, JobApplicationUpdate
-from app.database import applications_db
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app import models, schemas
 
 router = APIRouter(
     prefix="/applications",
@@ -8,60 +11,61 @@ router = APIRouter(
 )
 
 # Alle Bewerbungen abrufen
-@router.get("/")
-def get_applications():
-    return applications_db
+@router.get("/", response_model=List[schemas.JobApplicationResponse])
+def get_applications(db: Session = Depends(get_db)):
+    return db.query(models.JobApplicationModel).all()
 
-# Eine einzelne Bewerbung über ihre ID abrufen
-@router.get("/{app_id}")
-def get_application(app_id: int):
-    for app in applications_db:
-        if app.id == app_id:
-            return app
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Bewerbung mit ID {app_id} wurde nicht gefunden."
-    )
+# Einzelne Bewerbung über ID abrufen
+@router.get("/{app_id}", response_model=schemas.JobApplicationResponse)
+def get_application(app_id: int, db: Session = Depends(get_db)):
+    app = db.query(models.JobApplicationModel).filter(models.JobApplicationModel.id == app_id).first()
+    if not app:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Bewerbung mit ID {app_id} wurde nicht gefunden."
+        )
+    return app
 
 # Neue Bewerbung anlegen
-@router.post("/", status_code=status.HTTP_201_CREATED)
-def create_application(application: JobApplication):
-    for app in applications_db:
-        if app.id == application.id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Eine Bewerbung mit ID {application.id} existiert bereits."
-            )
-    applications_db.append(application)
-    return {"message": "Bewerbung erfolgreich hinzugefügt!", "data": application}
-
-# Bestehende Bewerbung aktualisieren (z. B. Status ändern)
-@router.put("/{app_id}")
-def update_application(app_id: int, updated_data: JobApplicationUpdate):
-    for app in applications_db:
-        if app.id == app_id:
-            if updated_data.company is not None:
-                app.company = updated_data.company
-            if updated_data.role is not None:
-                app.role = updated_data.role
-            if updated_data.status is not None:
-                app.status = updated_data.status
-            return {"message": "Bewerbung aktualisiert!", "data": app}
-
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Bewerbung mit ID {app_id} wurde nicht gefunden."
+@router.post("/", response_model=schemas.JobApplicationResponse, status_code=status.HTTP_201_CREATED)
+def create_application(application: schemas.JobApplicationCreate, db: Session = Depends(get_db)):
+    db_app = models.JobApplicationModel(
+        company=application.company,
+        role=application.role,
+        status=application.status
     )
+    db.add(db_app)
+    db.commit()
+    db.refresh(db_app)
+    return db_app
+
+# Bestehende Bewerbung aktualisieren
+@router.put("/{app_id}", response_model=schemas.JobApplicationResponse)
+def update_application(app_id: int, updated_data: schemas.JobApplicationUpdate, db: Session = Depends(get_db)):
+    app_query = db.query(models.JobApplicationModel).filter(models.JobApplicationModel.id == app_id)
+    app = app_query.first()
+
+    if not app:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Bewerbung mit ID {app_id} wurde nicht gefunden."
+        )
+
+    update_dict = updated_data.model_dump(exclude_unset=True)
+    app_query.update(update_dict, synchronize_session=False)
+    db.commit()
+    db.refresh(app)
+    return app
 
 # Bewerbung löschen
-@router.delete("/{app_id}")
-def delete_application(app_id: int):
-    for index, app in enumerate(applications_db):
-        if app.id == app_id:
-            deleted_app = applications_db.pop(index)
-            return {"message": "Bewerbung gelöscht!", "data": deleted_app}
-
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Bewerbung mit ID {app_id} wurde nicht gefunden."
-    )
+@router.delete("/{app_id}", status_code=status.HTTP_200_OK)
+def delete_application(app_id: int, db: Session = Depends(get_db)):
+    app = db.query(models.JobApplicationModel).filter(models.JobApplicationModel.id == app_id).first()
+    if not app:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Bewerbung mit ID {app_id} wurde nicht gefunden."
+        )
+    db.delete(app)
+    db.commit()
+    return {"message": f"Bewerbung mit ID {app_id} erfolgreich gelöscht."}

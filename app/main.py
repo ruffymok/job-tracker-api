@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import applications
+from app.routers import applications
 
 app = FastAPI(title="Job Tracker API")
 

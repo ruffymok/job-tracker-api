@@ -18,7 +18,7 @@ function initTheme() {
 
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
-        themeToggle.innerText = '☀️ Light Mode';
+        themeToggle.innerText = 'Light Mode';
     }
 
     themeToggle.addEventListener('click', () => {

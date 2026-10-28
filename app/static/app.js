@@ -1,11 +1,45 @@
 const API_URL = '/applications/';
 
-document.addEventListener('DOMContentLoaded', fetchApplications);
+const STATUS_ORDER = {
+    'offer': 1,
+    'interview': 2,
+    'applied': 3,
+    'rejected': 4
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    fetchApplications();
+});
+
+function initTheme() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('theme');
+
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeToggle.innerText = '☀️ Light Mode';
+    }
+
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        themeToggle.innerText = isDark ? 'Light Mode' : 'Dark Mode';
+    });
+}
 
 async function fetchApplications() {
     try {
         const response = await fetch(API_URL);
-        const applications = await response.json();
+        let applications = await response.json();
+
+        applications.sort((a, b) => {
+            const orderA = STATUS_ORDER[a.status] || 99;
+            const orderB = STATUS_ORDER[b.status] || 99;
+            return orderA - orderB;
+        });
+
         renderTable(applications);
     } catch (error) {
         console.error('Fehler beim Laden der Bewerbungen:', error);
@@ -17,7 +51,7 @@ function renderTable(applications) {
     tbody.innerHTML = '';
 
     if (applications.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: #718096; padding: 20px;">Noch keine Bewerbungen vorhanden.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 20px;">Noch keine Bewerbungen vorhanden.</td></tr>';
         return;
     }
 
@@ -28,11 +62,11 @@ function renderTable(applications) {
             <td><strong>${escapeHtml(app.company)}</strong></td>
             <td>${escapeHtml(app.role)}</td>
             <td>
-                <select class="status-select" onchange="updateStatus(${app.id}, this.value)">
+                <select class="status-select status-${app.status}" onchange="updateStatus(${app.id}, this.value)">
                     <option value="applied" ${app.status === 'applied' ? 'selected' : ''}>Beworben</option>
                     <option value="interview" ${app.status === 'interview' ? 'selected' : ''}>Interview</option>
                     <option value="offer" ${app.status === 'offer' ? 'selected' : ''}>Zusage</option>
-                    <option value="rejected" ${app.status === 'rejected' ? 'selected' : ''}>rAbsage</option>
+                    <option value="rejected" ${app.status === 'rejected' ? 'selected' : ''}>Absage</option>
                 </select>
             </td>
             <td>
@@ -76,7 +110,9 @@ async function updateStatus(id, newStatus) {
             body: JSON.stringify({ status: newStatus })
         });
 
-        if (!response.ok) {
+        if (response.ok) {
+            fetchApplications();
+        } else {
             alert('Fehler beim Aktualisieren des Status.');
             fetchApplications();
         }

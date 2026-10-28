@@ -1,13 +1,55 @@
+:root {
+    --bg-color: #f4f6f8;
+    --card-bg: #ffffff;
+    --text-color: #333333;
+    --text-muted: #718096;
+    --border-color: #e2e8f0;
+    --input-bg: #ffffff;
+    --header-color: #1a202c;
+    --table-header-bg: #edf2f7;
+
+    /* Status Farben */
+    --status-offer-bg: #def7ec;
+    --status-offer-text: #03543f;
+    --status-interview-bg: #fef3c7;
+    --status-interview-text: #92400e;
+    --status-applied-bg: #e1effe;
+    --status-applied-text: #1e429f;
+    --status-rejected-bg: #fde8e8;
+    --status-rejected-text: #9b1c1c;
+}
+
+body.dark-mode {
+    --bg-color: #121827;
+    --card-bg: #1f2937;
+    --text-color: #f3f4f6;
+    --text-muted: #9ca3af;
+    --border-color: #374151;
+    --input-bg: #374151;
+    --header-color: #ffffff;
+    --table-header-bg: #111827;
+
+    --status-offer-bg: #064e3b;
+    --status-offer-text: #a7f3d0;
+    --status-interview-bg: #78350f;
+    --status-interview-text: #fde68a;
+    --status-applied-bg: #1e3a8a;
+    --status-applied-text: #bfdbfe;
+    --status-rejected-bg: #7f1d1d;
+    --status-rejected-text: #fecaca;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    transition: background-color 0.2s, color 0.2s;
 }
 
 body {
-    background-color: #f4f6f8;
-    color: #333;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     padding: 30px 20px;
 }
 
@@ -23,9 +65,15 @@ header {
     margin-bottom: 24px;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
 h1 {
     font-size: 1.8rem;
-    color: #1a202c;
+    color: var(--header-color);
 }
 
 .docs-link {
@@ -39,17 +87,17 @@ h1 {
 }
 
 .card {
-    background: #ffffff;
+    background: var(--card-bg);
     border-radius: 8px;
     padding: 24px;
     margin-bottom: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .card h2 {
     font-size: 1.2rem;
     margin-bottom: 16px;
-    color: #2d3748;
+    color: var(--header-color);
 }
 
 #add-job-form {
@@ -68,14 +116,16 @@ h1 {
     font-size: 0.85rem;
     font-weight: 600;
     margin-bottom: 6px;
-    color: #4a5568;
+    color: var(--text-muted);
 }
 
 input, select {
     padding: 10px;
-    border: 1px solid #cbd5e0;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.95rem;
+    background-color: var(--input-bg);
+    color: var(--text-color);
 }
 
 input:focus, select:focus {
@@ -89,7 +139,6 @@ input:focus, select:focus {
     border-radius: 6px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
 }
 
 .btn-primary {
@@ -99,6 +148,15 @@ input:focus, select:focus {
 
 .btn-primary:hover {
     background-color: #2b6cb0;
+}
+
+.btn-secondary {
+    background-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.btn-secondary:hover {
+    opacity: 0.8;
 }
 
 .btn-danger {
@@ -124,19 +182,41 @@ table {
 
 th, td {
     padding: 12px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 th {
-    background-color: #edf2f7;
+    background-color: var(--table-header-bg);
     font-size: 0.85rem;
     text-transform: uppercase;
-    color: #4a5568;
+    color: var(--text-muted);
 }
 
 .status-select {
-    padding: 6px 10px;
+    padding: 6px 12px;
     font-size: 0.85rem;
-    font-weight: 600;
-    border-radius: 6px;
+    font-weight: 700;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+}
+
+.status-offer {
+    background-color: var(--status-offer-bg);
+    color: var(--status-offer-text);
+}
+
+.status-interview {
+    background-color: var(--status-interview-bg);
+    color: var(--status-interview-text);
+}
+
+.status-applied {
+    background-color: var(--status-applied-bg);
+    color: var(--status-applied-text);
+}
+
+.status-rejected {
+    background-color: var(--status-rejected-bg);
+    color: var(--status-rejected-text);
 }

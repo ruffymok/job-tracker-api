@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Tracker Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Job Tracker Dashboard</h1>
+            <a href="/docs" class="docs-link" target="_blank">Swagger API Docs</a>
+        </header>
+
+        <section class="card">
+            <h2>Neue Bewerbung hinzufügen</h2>
+            <form id="add-job-form">
+                <div class="form-group">
+                    <label for="company">Unternehmen</label>
+                    <input type="text" id="company" placeholder="z.B. BMW, SAP, Google" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Rolle / Stelle</label>
+                    <input type="text" id="role" placeholder="z.B. Werkstudent Backend" required>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status">
+                        <option value="applied">Beworben</option>
+                        <option value="interview">Interview</option>
+                        <option value="offer">Zusage</option>
+                        <option value="rejected">Absage</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Hinzufügen</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Meine Bewerbungen</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Unternehmen</th>
+                            <th>Rolle</th>
+                            <th>Status</th>
+                            <th>Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="job-list">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
